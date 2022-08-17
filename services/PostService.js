@@ -333,6 +333,66 @@ class PostService {
       console.log("[PostService.js, deleteProductFromCategory]: " + err);
     }
   }
+
+  async filter(filterObject){
+    try{
+      const products = await this.getPosts('Product');
+      const filteredProducts = [];
+    
+      products.map(product => {
+        const filteringDetails = Object.entries(filterObject.details).map((e) => ({[e[0]]: e[1] } ));
+        const filteringFilters = Object.entries(filterObject.filters).map((e) => ({[e[0]]: e[1] } ));
+
+        product.details.map(detail => {
+          const entries = new Map([
+            [detail.key, detail.value]
+          ])
+
+          filteringDetails.map(item => {
+            if(JSON.stringify(item) === JSON.stringify(Object.fromEntries(entries))){
+              const ind = filteringDetails.indexOf(item)
+              filteringDetails.splice(ind, 1);
+            }
+          })
+        });
+        
+        product.filters.map(filterItem => {
+          const entries = new Map([
+            [filterItem.key, filterItem.value]
+          ])
+
+          filteringFilters.map(item => {
+            if(JSON.stringify(item) === JSON.stringify(Object.fromEntries(entries))){
+              const ind = filteringFilters.indexOf(item)
+              filteringFilters.splice(ind, 1);
+            }
+          })
+        });
+
+        if(filteringDetails.length === 0 && filteringFilters.length === 0 &&
+          (product.price >= parseInt(filterObject.price.from) && product.price <= parseInt(filterObject.price.to))){
+          filteredProducts.push(product)
+        }
+      })
+
+      return filteredProducts;
+    } catch (err){
+      console.log("[PostService.js, filter]: " + err);
+    }
+  }
+
+  async search(searchString){
+    const allProducts = await this.getPosts('Product');
+    const findedProducts = [];
+
+    allProducts.map(product => {
+      if(product.title.toLowerCase().includes(searchString.toLowerCase()))
+        findedProducts.push(product);
+    })
+    
+    return findedProducts;
+  }
+
 }
 
 module.exports = new PostService();

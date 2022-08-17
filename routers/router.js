@@ -16,6 +16,8 @@ router.post("/deleteProductFromCategory", postController.deleteProductFromCatego
 router.get("/getPostImages", postController.getPostImages);
 router.get("/getPosts", postController.getPosts);
 router.get("/getPost", postController.getPost);
+router.get("/filter", postController.filter)
+router.get("/search", postController.search);
 
 router.delete("/deletePost", postController.deletePost);
 router.delete("/deletePostImage", postController.deletePostImage);

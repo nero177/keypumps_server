@@ -133,6 +133,16 @@ class PostController {
     await postService.deleteProductFromCategory(categoryTitle, productTitle);
     return res.json({success: 'product successfully deleted from category'})
   }
+
+  async filter(req, res){
+    const filtered = await postService.filter(req.body);
+    return res.json(filtered);
+  }
+
+  async search(req, res){
+    const searched = await postService.search(req.query.searchString);
+    return res.json(searched)
+  }
 }
 
 module.exports = new PostController();
