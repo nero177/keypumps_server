@@ -2,8 +2,15 @@ const { Router } = require("express");
 const router = new Router();
 const postController = require("../controllers/PostController");
 const multipartFormParser = require("../middlewares/multipartFormParser");
+const userController = require("../controllers/UserController")
+const authMiddleware = require("../middlewares/auth.middleware")
 
 router.get("/", (req, res) => res.send("server"));
+
+/* AUTH */
+router.post('/login', userController.login);
+router.get('/auth', authMiddleware);
+/* /AUTH */ 
 
 /* POSTS */
 router.post("/editThumb", multipartFormParser, postController.uploadThumbnail);
@@ -22,5 +29,6 @@ router.get("/search", postController.search);
 router.delete("/deletePost", postController.deletePost);
 router.delete("/deletePostImage", postController.deletePostImage);
 /* /POSTS */
+
 
 module.exports = router;

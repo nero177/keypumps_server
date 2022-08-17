@@ -392,7 +392,6 @@ class PostService {
     
     return findedProducts;
   }
-
 }
 
 module.exports = new PostService();
