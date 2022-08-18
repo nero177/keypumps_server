@@ -8,6 +8,10 @@ const mongoose = require('mongoose');
 
 app.use(corsMiddleware);
 app.use(express.json());
+app.use((req, res, next) => {
+    console.log(req.headers)
+    next();
+})
 app.use(express.urlencoded({ extended: false }));
 app.use('/', router);
 
