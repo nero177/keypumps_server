@@ -9,11 +9,14 @@ const mongoose = require('mongoose');
 app.use(cors({
     origin: 'https://keypumps-client.vercel.app'
 }));
-app.use(express.json());
 app.use((req, res, next) => {
-    console.log(req.headers)
-    next();
+    if ('OPTIONS' == req.method) {
+        return res.sendStatus(200);
+    } else {
+        next();
+    }
 })
+app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use('/', router);
 
