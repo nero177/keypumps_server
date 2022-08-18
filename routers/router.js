@@ -9,7 +9,7 @@ router.get("/", (req, res) => res.send("server"));
 
 /* AUTH */
 router.post('/login', userController.login);
-router.get('/auth', authMiddleware);
+router.options('/auth', authMiddleware);
 /* /AUTH */ 
 
 /* POSTS */
