@@ -6,6 +6,11 @@ const corsMiddleware = require('cors');
 const DB_URI = `mongodb+srv://eyeadmin:yhe0BtoHQ1XRB1C0@cluster0.r6brd.mongodb.net/keypumps?retryWrites=true&w=majority`;
 const mongoose = require('mongoose');
 
+app.use((req, res, next) => {
+    console.log(req.method)
+    if(req.method == 'OPTIONS')
+        return next();
+})
 app.use(corsMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
