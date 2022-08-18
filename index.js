@@ -2,13 +2,11 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 4000;
 const router = require('./routers/router');
-const cors = require('cors');
+const corsMiddleware = require('cors');
 const DB_URI = `mongodb+srv://eyeadmin:yhe0BtoHQ1XRB1C0@cluster0.r6brd.mongodb.net/keypumps?retryWrites=true&w=majority`;
 const mongoose = require('mongoose');
 
-app.use(cors({
-    origin: 'https://keypumps-client.vercel.app'
-}));
+app.use(corsMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use('/', router);
