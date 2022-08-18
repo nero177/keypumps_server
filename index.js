@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 4000;
 const router = require('./routers/router');
-const corsMiddleware = require('cors');
+const corsMiddleware = require('./middlewares/cors.middleware');
 const DB_URI = `mongodb+srv://eyeadmin:yhe0BtoHQ1XRB1C0@cluster0.r6brd.mongodb.net/keypumps?retryWrites=true&w=majority`;
 const mongoose = require('mongoose');
 
