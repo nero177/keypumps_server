@@ -225,7 +225,7 @@ class PostService {
 
           return categoriesDto;
         case "Promo":
-          return Promo.find();
+          return await Promo.find();
         case "Product":
           const products = await Product.find();
           const productsDto = [];

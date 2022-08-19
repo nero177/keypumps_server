@@ -6,9 +6,7 @@ const cors = require('cors');
 const DB_URI = `mongodb+srv://eyeadmin:yhe0BtoHQ1XRB1C0@cluster0.r6brd.mongodb.net/keypumps?retryWrites=true&w=majority`;
 const mongoose = require('mongoose');
 
-app.use(cors({
-    origin: 'https://keypumps-client.vercel.app'
-}));
+app.use(cors());
 app.use((req, res, next) => {
     if ('OPTIONS' == req.method) {
         return res.sendStatus(200);
