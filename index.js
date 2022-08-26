@@ -6,16 +6,11 @@ const cors = require('cors');
 const DB_URI = `mongodb+srv://eyeadmin:yhe0BtoHQ1XRB1C0@cluster0.r6brd.mongodb.net/keypumps?retryWrites=true&w=majority`;
 const mongoose = require('mongoose');
 
-app.use(cors());
-app.use((req, res, next) => {
-    if ('OPTIONS' == req.method) {
-        return res.sendStatus(200);
-    } else {
-        next();
-    }
-})
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors({
+    origin: ['http://localhost:3000', 'https://keypumps-client.vercel.app']
+}));
 app.use('/', router);
 
 app.listen(PORT, async () => {

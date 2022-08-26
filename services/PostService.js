@@ -51,14 +51,15 @@ class PostService {
           post = await Category.create(newCategory);
           return post;
         case "Product":
-          post = await Product.findOne({ title: title });
+          post = await Product.findOne({ title: title }); //check if product already exist
           if (post) break;
 
-          const newProduct = { title, ...additional };
+          const newProduct = { title, ...additional }; //create new product from title and additional options
           await Product.create(newProduct);
-
-          const productCategory = await Category.findOne({title: newProduct.category})
-          productCategory.products.push(newProduct.title);
+          //find selected category of new product
+          const productCategory = await Category.findOne({title: newProduct.category}) 
+          //push new product to selected category and save it
+          productCategory.products.push(newProduct);
           await productCategory.save()
 
           break;
@@ -67,8 +68,11 @@ class PostService {
 
           if (post) break;
 
+          const date = new Date();
+
           const newArticle = {
             title,
+            date
           };
 
           return await Article.create(newArticle);
@@ -205,37 +209,45 @@ class PostService {
     try {
       switch (postType) {
         case "Article":
-         const articles = await Article.find();
-          const articlesDto = [];
+          const articles = await Article.find();
+          const articlesObject = [];
 
-          articles.forEach(article => {
-            const articleDto = new ArticleDTO(article);
-            articlesDto.push({...articleDto});
-          })
+          await Promise.all(
+            articles.map(async (article) => {
+              const articleDto = new ArticleDTO(article);
+              const articleImage = await Image.findById(article.thumbnailId);
+              articlesObject.push({...articleDto, articleImage});
+            })
+          )   
 
-          return articlesDto;
+          return articlesObject;
         case "Category":
           const categories = await Category.find();
-          const categoriesDto = [];
+          const categoriesObject = [];
 
-          categories.forEach(category => {
-            const categoryDto = new CategoryDTO(category);
-            categoriesDto.push({...categoryDto});
-          })
-
-          return categoriesDto;
+          await Promise.all(
+            categories.map(async (category) => {
+              const categoryDto = new CategoryDTO(category);
+              const categoryImage = await Image.findById(category.thumbnailId);
+              categoriesObject.push({...categoryDto, categoryImage});
+            })
+          )
+         
+          return categoriesObject;
         case "Promo":
           return await Promo.find();
         case "Product":
           const products = await Product.find();
-          const productsDto = [];
+          const productsObject = [];
 
-          products.forEach(product => {
+          await Promise.all(products.map(async (product) => {
             const productDto = new ProductDTO(product);
-            productsDto.push({...productDto});
-          })
-
-          return productsDto;
+            const productImages = await this.getPostImages(product.title, postType);
+            
+            productsObject.push({...productDto, productImages});
+          }))
+        
+          return productsObject;
         default:
           break;
       }
@@ -300,19 +312,24 @@ class PostService {
 
   async changeProductCategory(productTitle, newCategoryTitle){
     try{
-      const product = await Product.findOne({title: productTitle}); //find the product
-      const productPrevCategory = await Category.findOne({title: product.category}); //find previus product category
+      //find the product
+      const product = await Product.findOne({title: productTitle}); 
+      //find previus product category to delete this product from it 
+      const productPrevCategory = await Category.findOne({title: product.category}); 
 
       if(productPrevCategory){
-        const filteredProducts = productPrevCategory.products.filter(item => item !== productTitle); //remove this product from previus category
+        const filteredProducts = productPrevCategory.products.filter(productItem => productItem.title !== productTitle); //remove this product from previus category
         productPrevCategory.products = filteredProducts; //update previus category
         await productPrevCategory.save();
       }
     
-      const newCategory = await Category.findOne({title: newCategoryTitle}); //get selected category
-      newCategory.products.push(productTitle); //push this product to selected category and save
+      //get new selected category
+      const newCategory = await Category.findOne({title: newCategoryTitle});
+      //push this product to selected category and save 
+      newCategory.products.push(productTitle); 
       await newCategory.save();
 
+      //change product old category title to new and save
       product.category = newCategoryTitle;
       await product.save();
     } catch (err){
@@ -322,10 +339,15 @@ class PostService {
 
   async deleteProductFromCategory(categoryTitle, productTitle){
     try{
-      const category = await Category.findOne({title: categoryTitle});
-      category.products = category.products.filter(item => item !== productTitle);
+      //find category we want to delete product from
+      const category = await Category.findOne({title: categoryTitle}); 
+      //delete product from category and save
+     
+      category.products = category.products.filter(productItem => productItem.title !== productTitle);
       await category.save();
 
+      //find product that has been deleted from category, set it's category to "No category" and save
+      //and yep, i'm a captain obvious
       const product = await Product.findOne({title: productTitle});
       product.category = 'Без категории';
       await product.save();
