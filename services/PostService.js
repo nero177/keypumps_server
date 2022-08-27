@@ -156,6 +156,11 @@ class PostService {
           banner.imagesIds.splice(index, 1);
           await banner.save();
           return true;
+        case "Product":
+          const product = await Product.findOne({title: postTitle});
+          product.imagesIds.splice(index, 1);
+          await product.save();
+          return true;
         default:
           break;
       }
