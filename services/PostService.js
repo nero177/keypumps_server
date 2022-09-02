@@ -127,22 +127,36 @@ class PostService {
         case "Product":
           post = await Product.findOne({ title: postTitle });
           break;
+        case "Category":
+          post = await Category.findOne({title: postTitle});
+          break;
+        case "Article":
+          post = await Article.findOne({title: postTitle});
+          break;
         default:
           break;
       }
 
       if (!post) return;
 
-      let photos = [];
+      let photosLinks = [];
 
-      await Promise.all(
-        post.imagesIds.map(async (imageId) => {
-          const postImage = await Image.findById(imageId);
-          photos.push(postImage.image);
-        })
-      );
+      if(post.imagesIds){
+        await Promise.all(
+            post.imagesIds.map(async (imageId) => {
+              const postImage = await Image.findById(imageId);
+              const convertedBuffer = "data:image/jpeg;base64," + postImage.image.toString('base64');
 
-      return photos;
+              photosLinks.push(convertedBuffer)
+            })
+        );
+      } else {
+        const postImage = await Image.findById(post.thumbnailId)
+        const convertedBuffer = "data:image/jpeg;base64," + postImage.image.toString('base64');
+        photosLinks.push(convertedBuffer)
+      }
+
+      return {photosLinks};
     } catch (err) {
       console.log("[PostService.js, getPostImages]: " + err);
     }
@@ -268,22 +282,24 @@ class PostService {
       switch (postType) {
         case "Category":
           const category = await Category.findOne({ title: postTitle });
-          postImages = await Image.findById(category.thumbnailId);
+          postImages = await this.getPostImages(postTitle, postType);
           const categoryDto = new CategoryDTO(category);
          
           return { ...categoryDto, postImages };
         case "Article":
           const article = await Article.findOne({ title: postTitle });
-          postImages = await Image.findById(article.thumbnailId);
+          postImages = await this.getPostImages(postTitle, postType);
           const articleDto = new ArticleDTO(article);
          
           return { ...articleDto, postImages };
         case "Product":
           const product = await Product.findOne({ title: postTitle });
-         
           postImages = await this.getPostImages(postTitle, postType);
           const productDto = new ProductDTO(product);
           return { ...productDto, postImages };
+        case "Banner":
+          postImages = await this.getPostImages(postTitle, postType);
+          return {postImages};
         default:
           break;
       }
@@ -319,7 +335,7 @@ class PostService {
     try{
       //find the product
       const product = await Product.findOne({title: productTitle}); 
-      //find previus product category to delete this product from it 
+      //find previous product category to delete this product from it
       const productPrevCategory = await Category.findOne({title: product.category}); 
 
       if(productPrevCategory){
