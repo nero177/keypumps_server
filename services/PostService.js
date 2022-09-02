@@ -234,7 +234,7 @@ class PostService {
           await Promise.all(
             articles.map(async (article) => {
               const articleDto = new ArticleDTO(article);
-              const articleImage = await Image.findById(article.thumbnailId);
+              const articleImage = await this.getPostImages(article.title, postType);
               articlesObject.push({...articleDto, articleImage});
             })
           )   
@@ -247,11 +247,11 @@ class PostService {
           await Promise.all(
             categories.map(async (category) => {
               const categoryDto = new CategoryDTO(category);
-              const categoryImage = await Image.findById(category.thumbnailId);
+              const categoryImage = await this.getPostImages(category.title, postType);
               categoriesObject.push({...categoryDto, categoryImage});
             })
           )
-         
+
           return categoriesObject;
         case "Promo":
           return await Promo.find();
