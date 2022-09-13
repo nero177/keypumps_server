@@ -9,10 +9,10 @@ const Product = new Schema({
     initialPrice: {type: Number},
     discountPrice: {type: Number},
     linkedProducts: [{type: Object, ref: 'Product'}],
-    filters: [{type: Object}],
+    filters: [{type: String}],
     description: {type: String, default: 'Product description'},
     details: [{type: Object}],
-    imagesIds: [{type: String}]
+    imagesIds: [{type: Schema.Types.ObjectId, ref: 'Image'}],
 })
 
 module.exports = model('Product', Product)

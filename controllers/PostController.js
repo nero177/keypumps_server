@@ -2,42 +2,6 @@ const postService = require("../services/PostService");
 const fs = require("fs");
 
 class PostController {
-  async uploadThumbnail(req, res) {
-    const title = req.query.title;
-    const postType = req.query.postType;
-    let img, refererPage; //page of editing post type
-
-    switch (postType) {
-      case "Category":
-        img = fs.readFileSync(req.files.categoryImage[0].path);
-        refererPage = "editCategory";
-        break;
-      case "Article":
-        img = fs.readFileSync(req.files.articleImage[0].path);
-        refererPage = "editArticle";
-        break;
-      default:
-        break;
-    }
-
-    const encodeImg = img.toString("base64");
-    const finalImg = {
-      image: Buffer.from(encodeImg, "base64"),
-    };
-
-    const response = await postService.uploadThumbnail(
-      finalImg,
-      title,
-      postType
-    );
-
-    if (!response)
-      return res.json({ error: "Error while uploading thumbnail" });
-
-    const redirectLink = req.headers.referer + refererPage + `?${title}`;
-    return res.redirect(redirectLink);
-  }
-
   async createPost(req, res) {
     const response = await postService.createPost(
       req.body.title,
@@ -47,38 +11,14 @@ class PostController {
     res.json({ response });
   }
 
-  async addPostImage(req, res) {
-    let img;
+  async uploadPostImage(req, res, next) {
     const {postType, postTitle} = req.query;
-   
-    switch (postType) {
-      case "Banner":
-        img = fs.readFileSync(req.files.bannerImage[0].path);
-        break;
-      case "Product":
-        img = fs.readFileSync(req.files.productImage[0].path)
-        break;
-      default:
-        break;
-    }
+    const fileSrc = res.locals.fileSrc;
 
-    const encodeImg = img.toString("base64");
-    const finalImg = {
-      image: Buffer.from(encodeImg, "base64"),
-    };
+    await postService.uploadPostImage(fileSrc, postType, postTitle);
 
-    await postService.addPostImage(finalImg, postType, postTitle);
-
-    switch (postType) {
-      case "Banner":
-        res.redirect(req.headers.referer + "banners");
-        break;
-      case "Product":
-        res.redirect(req.headers.referer + `editProduct?${postTitle}`)
-        break;
-      default:
-        break;
-    }
+    res.locals = req.query; //pass query params to locals for next (reload) middleware
+    next();
   }
 
   async getPostImages(req, res) {
@@ -117,6 +57,12 @@ class PostController {
     return res.json({post});
   }
 
+  async getPostsById(req, res){
+    const {ids, postType} = req.query;
+    const posts = await postService.getPostsById(ids, postType);
+    return res.json({posts});
+  }
+
   async updatePost(req, res){
     const post = req.body.post;
     const postType = req.query.postType;
@@ -134,14 +80,16 @@ class PostController {
     return res.json({success: 'product successfully deleted from category'})
   }
 
-  async filter(req, res){
-    const filtered = await postService.filter(req.body);
-    return res.json(filtered);
-  }
-
   async search(req, res){
     const searched = await postService.search(req.query.searchString);
     return res.json(searched)
+  }
+
+  async filterProducts(req, res){
+    const {categoryTitle, filters} = req.query;
+ 
+    const filtered = await postService.filterProducts(categoryTitle, JSON.stringify(filters));
+    return res.json(filtered);
   }
 }
 

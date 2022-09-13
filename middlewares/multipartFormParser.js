@@ -10,32 +10,12 @@ module.exports = (req, res, next) => {
     })
 
     try{
-        form.parse(req, function (err, fields, files) {
+        form.parse(req, async function (err, fields, files) {
             req.body = fields;
             req.files = files;
             
-            let filename;
-            let fileContent;
-    
-            if(files.articleImage){
-                filename = files.articleImage[0].originalFilename;
-                fileContent = fs.readFileSync(files.articleImage[0].path)
-            }
-            
-            if(files.categoryImage){
-                filename = files.categoryImage[0].originalFilename;
-                fileContent = fs.readFileSync(files.categoryImage[0].path)
-            }
-
-            if(files.productImage){
-                filename = files.productImage[0].originalFilename;
-                fileContent = fs.readFileSync(files.productImage[0].path)
-            }
-
-            if(files.bannerImage){
-                filename = files.bannerImage[0].originalFilename;
-                fileContent = fs.readFileSync(files.bannerImage[0].path)
-            }
+            const filename = files.postImage[0].originalFilename;
+            const fileContent = fs.readFileSync(files.postImage[0].path)
     
             const params = {
                 Bucket: 'keypumpsbucket',
@@ -43,11 +23,8 @@ module.exports = (req, res, next) => {
                 Body: fileContent
             }
     
-            s3.upload(params, (err, data) => {
-                if(err)
-                    console.log(err)
-            })
-    
+            const uploadData = await s3.upload(params).promise();
+            res.locals.fileSrc = uploadData.Location;
             next();
         })
     } catch (err) {
