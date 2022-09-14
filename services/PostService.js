@@ -187,7 +187,6 @@ class PostService {
           const productCategory = await Category.findOne({title: product.category})
         
           if (productCategory) {
-            console.log(product._id)
             productCategory.products = productCategory.products.filter(
               productId => productId !== product._id.toString()
             );
@@ -275,10 +274,11 @@ class PostService {
       switch (postType) {
         case "Category":
           const category = await Category.findOne({ title: postTitle });
+          console.log(category)
           postImages = await this.getPostImages(postTitle, postType);
           const categoryDto = new CategoryDTO(category);
           const categoryProducts = await this.getPostsById(category.products, "Product")
-        
+          console.log('works after it')
           return { ...categoryDto, postImages, categoryProducts };
         case "Article":
           const article = await Article.findOne({ title: postTitle });
