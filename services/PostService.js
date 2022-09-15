@@ -187,6 +187,7 @@ class PostService {
           const productCategory = await Category.findOne({title: product.category})
         
           if (productCategory) {
+            console.log(product._id)
             productCategory.products = productCategory.products.filter(
               productId => productId !== product._id.toString()
             );
@@ -243,7 +244,7 @@ class PostService {
         case "Promo":
           return await Promo.find();
         case "Product":
-          const products = await Product.find();
+          const products = await Product.find().sort({order: -1});
           const productsObject = [];
 
           await Promise.all(
@@ -274,11 +275,12 @@ class PostService {
       switch (postType) {
         case "Category":
           const category = await Category.findOne({ title: postTitle });
-          console.log(category)
+          console.log()
           postImages = await this.getPostImages(postTitle, postType);
+        
           const categoryDto = new CategoryDTO(category);
           const categoryProducts = await this.getPostsById(category.products, "Product")
-          console.log('works after it')
+
           return { ...categoryDto, postImages, categoryProducts };
         case "Article":
           const article = await Article.findOne({ title: postTitle });
@@ -409,22 +411,29 @@ class PostService {
     return findedProducts;
   }
 
-  async filterProducts(categoryTitle, filters){
+  async filterProducts(filters){
     try{
-      const parsedFilters = JSON.parse(filters).split(',');
-      const category = await this.getPost(categoryTitle, "Category");
-      const filteredProducts = [];
+      const parsedFilters = filters.split(',');
+      return await Product.find({filters: {$in: parsedFilters}});
+      // const category = await this.getPost(categoryTitle, "Category");
+      // const filteredProducts = [];
     
-      category.categoryProducts.map(productObject => {
-        const found = parsedFilters.every(filter => productObject.product.filters.includes(filter));
+      // category.categoryProducts.map(productObject => {
+      //   const found = parsedFilters.every(filter => productObject.product.filters.includes(filter));
 
-        if(found)
-          filteredProducts.push(productObject);
-      });
-
-      return filteredProducts
+      //   if(found)
+      //     filteredProducts.push(productObject);
+      // });
     } catch (err) {
       console.log("[PostService.js, filterProducts]: " + err);
+    }
+  }
+
+  async filterByPrice(from, to){
+    try{
+      return await Product.find({price: {$gt: from, $lt: to}}); 
+    } catch (err){
+      console.log("[PostService.js, filterByPrice]: " + err);
     }
   }
 }

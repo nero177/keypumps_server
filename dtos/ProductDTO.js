@@ -3,6 +3,7 @@ module.exports = class CategoryDTO{
     title;
     category;
     displayMain;
+    topSales;
     price;
     initialPrice;
     discountPrice;
@@ -11,6 +12,7 @@ module.exports = class CategoryDTO{
     description;
     details;
     inStock;
+    order;
 
     constructor(model){
         this.id = model._id;
@@ -25,6 +27,8 @@ module.exports = class CategoryDTO{
         this.description = model.description;
         this.details = model.details;
         this.inStock = model.inStock;
+        this.topSales = model.topSales;
+        this.order = model.order;
     }
 }
 

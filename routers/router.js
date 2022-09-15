@@ -26,6 +26,7 @@ router.get("/getPosts", postController.getPosts);
 router.get("/getPost", postController.getPost);
 router.get("/search", postController.search);
 router.get("/filterProducts", postController.filterProducts);
+router.get("/filterByPrice", postController.filterByPrice);
 
 router.delete("/deletePost", postController.deletePost);
 router.delete("/deletePostImage", postController.deletePostImage);
