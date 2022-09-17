@@ -205,7 +205,7 @@ class PostService {
     }
   }
 
-  async getPosts(postType) {
+  async getPosts(postType, sortBy) {
     try {
 
       switch (postType) {
@@ -244,8 +244,8 @@ class PostService {
         case "Promo":
           return await Promo.find();
         case "Product":
-          const products = await Product.find().sort({order: -1});
-          const productsObject = [];
+          let products = await Product.find();
+          let productsObject = [];
 
           await Promise.all(
             products.map(async (product) => {
@@ -259,6 +259,18 @@ class PostService {
             })
           );
 
+          switch (sortBy){
+            case 'price_descending':
+              productsObject = productsObject.sort((a, b) => a.price > b.price ? 1 : -1);
+              break;
+            case 'price_ascending':
+              productsObject = productsObject.sort((a, b) => a.price > b.price ? -1 : 1);
+              break;
+            default:
+              productsObject = productsObject.sort((a, b) => a.order > b.order ? -1 : 1);
+              break;
+          }
+          
           return productsObject;
         default:
           break;
@@ -411,29 +423,45 @@ class PostService {
     return findedProducts;
   }
 
-  async filterProducts(filters){
+  async filterProducts(categoryTitle, filters, priceFrom, priceTo){
     try{
-      const parsedFilters = filters.split(',');
-      return await Product.find({filters: {$in: parsedFilters}});
-      // const category = await this.getPost(categoryTitle, "Category");
-      // const filteredProducts = [];
-    
-      // category.categoryProducts.map(productObject => {
-      //   const found = parsedFilters.every(filter => productObject.product.filters.includes(filter));
+      priceFrom = parseInt(priceFrom);
+      priceTo   = parseInt(priceTo);
 
-      //   if(found)
-      //     filteredProducts.push(productObject);
-      // });
+      const parsedFilters = filters.split(',');
+      const category = await this.getPost(categoryTitle, "Category");
+      let filteredProducts = [];
+      
+    
+      category.categoryProducts.map(productObject => {
+        const found = parsedFilters.every(filter => productObject.product.filters.includes(filter));
+      
+        if(found)
+          filteredProducts.push(productObject);
+      });
+
+      if(priceFrom || priceTo)
+        filteredProducts = filteredProducts.filter(productObject => (productObject.product.price > priceFrom) && (productObject.product.price < priceTo));
+      
+      return filteredProducts;
     } catch (err) {
       console.log("[PostService.js, filterProducts]: " + err);
     }
   }
 
-  async filterByPrice(from, to){
+  // async filterByPrice(from, to){
+  //   try{
+  //     return await Product.find({price: {$gt: from, $lt: to}}); 
+  //   } catch (err){
+  //     console.log("[PostService.js, filterByPrice]: " + err);
+  //   }
+  // }
+
+  async getMainPageProducts(){
     try{
-      return await Product.find({price: {$gt: from, $lt: to}}); 
+      console.log('get')
     } catch (err){
-      console.log("[PostService.js, filterByPrice]: " + err);
+      console.log("[PostService.js, getMainPageProducts]: " + err);
     }
   }
 }

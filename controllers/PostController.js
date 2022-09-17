@@ -47,7 +47,8 @@ class PostController {
   }
 
   async getPosts(req, res){
-    const posts = await postService.getPosts(req.query.postType);
+    const {postType, sortBy} = req.query;
+    const posts = await postService.getPosts(postType, sortBy);
     return res.json({posts});
   }
 
@@ -86,16 +87,15 @@ class PostController {
   }
 
   async filterProducts(req, res){
-    const {filters} = req.query;
+    const {categoryTitle, filters, priceFrom, priceTo} = req.query;
  
-    const filtered = await postService.filterProducts(filters);
+    const filtered = await postService.filterProducts(categoryTitle, filters, priceFrom, priceTo);
     return res.json(filtered);
   }
 
-  async filterByPrice(req, res){
-    const {from, to} = req.query;
-    const filtered = await postService.filterByPrice(from, to);
-    return res.json(filtered);
+  async getMainPageProducts(){
+    const products = postService.getMainPageProducts();
+    return res.json(products);
   }
 }
 
