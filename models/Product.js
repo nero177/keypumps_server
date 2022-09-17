@@ -15,6 +15,7 @@ const Product = new Schema({
     description: {type: String, default: 'Product description'},
     details: [{type: Object}],
     imagesIds: [{type: Schema.Types.ObjectId, ref: 'Image'}],
+    articul: {type: Number}
 })
 
 module.exports = model('Product', Product)

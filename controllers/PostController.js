@@ -1,5 +1,4 @@
 const postService = require("../services/PostService");
-const fs = require("fs");
 
 class PostController {
   async createPost(req, res) {
@@ -82,8 +81,9 @@ class PostController {
   }
 
   async search(req, res){
-    const searched = await postService.search(req.query.searchString);
-    return res.json(searched)
+    const {searchString, limit} = req.query;
+    const searched = await postService.search(searchString, limit);
+    return res.json(searched);
   }
 
   async filterProducts(req, res){
@@ -93,8 +93,8 @@ class PostController {
     return res.json(filtered);
   }
 
-  async getMainPageProducts(){
-    const products = postService.getMainPageProducts();
+  async getMainPageProducts(req, res){
+    const products = await postService.getMainPageProducts();
     return res.json(products);
   }
 }

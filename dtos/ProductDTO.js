@@ -13,6 +13,7 @@ module.exports = class CategoryDTO{
     details;
     inStock;
     order;
+    articul;
 
     constructor(model){
         this.id = model._id;
@@ -29,6 +30,7 @@ module.exports = class CategoryDTO{
         this.inStock = model.inStock;
         this.topSales = model.topSales;
         this.order = model.order;
+        this.articul = model.articul;
     }
 }
 

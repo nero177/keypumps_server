@@ -261,10 +261,10 @@ class PostService {
 
           switch (sortBy){
             case 'price_descending':
-              productsObject = productsObject.sort((a, b) => a.price > b.price ? 1 : -1);
+              productsObject = productsObject.sort((a, b) => a.price > b.price ? -1 : 1);
               break;
             case 'price_ascending':
-              productsObject = productsObject.sort((a, b) => a.price > b.price ? -1 : 1);
+              productsObject = productsObject.sort((a, b) => a.price > b.price ? 1 : -1);
               break;
             default:
               productsObject = productsObject.sort((a, b) => a.order > b.order ? -1 : 1);
@@ -287,7 +287,6 @@ class PostService {
       switch (postType) {
         case "Category":
           const category = await Category.findOne({ title: postTitle });
-          console.log()
           postImages = await this.getPostImages(postTitle, postType);
         
           const categoryDto = new CategoryDTO(category);
@@ -325,15 +324,16 @@ class PostService {
           )
           return categories;
         case "Product":
-          const products = await Promise.all(
+          let products = await Promise.all(
             ids.map(async (id) => {
               const product = await Product.findById(id);
               const images = await this.getPostImages(product.title, 'Product');
-      
+
               return {product, images};
             })
-          )
+          );
 
+          products = products.sort((a, b) => a.order > b.order ? 1 : -1);
           return products;
         default: 
           break;
@@ -411,7 +411,7 @@ class PostService {
     }
   }
 
-  async search(searchString) {
+  async search(searchString, limit) {
     const allProducts = await this.getPosts("Product");
     const findedProducts = [];
 
@@ -419,6 +419,9 @@ class PostService {
       if (product.title.toLowerCase().includes(searchString.toLowerCase()))
         findedProducts.push(product);
     });
+
+    if(limit)
+      findedProducts.length = limit;
 
     return findedProducts;
   }
@@ -432,7 +435,7 @@ class PostService {
       const category = await this.getPost(categoryTitle, "Category");
       let filteredProducts = [];
       
-    
+      
       category.categoryProducts.map(productObject => {
         const found = parsedFilters.every(filter => productObject.product.filters.includes(filter));
       
@@ -449,17 +452,9 @@ class PostService {
     }
   }
 
-  // async filterByPrice(from, to){
-  //   try{
-  //     return await Product.find({price: {$gt: from, $lt: to}}); 
-  //   } catch (err){
-  //     console.log("[PostService.js, filterByPrice]: " + err);
-  //   }
-  // }
-
   async getMainPageProducts(){
     try{
-      console.log('get')
+      return await Product.find({displayMain: true});
     } catch (err){
       console.log("[PostService.js, getMainPageProducts]: " + err);
     }
