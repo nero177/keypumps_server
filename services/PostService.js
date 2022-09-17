@@ -333,7 +333,7 @@ class PostService {
             })
           );
 
-          products = products.sort((a, b) => a.order > b.order ? 1 : -1);
+          products = products.sort((a, b) => a.order > b.order ? -1 : 1);
           return products;
         default: 
           break;
@@ -445,6 +445,8 @@ class PostService {
 
       if(priceFrom || priceTo)
         filteredProducts = filteredProducts.filter(productObject => (productObject.product.price > priceFrom) && (productObject.product.price < priceTo));
+
+      filteredProducts = filteredProducts.sort((a, b) => a.order > b.order ? -1 : 1)
       
       return filteredProducts;
     } catch (err) {
